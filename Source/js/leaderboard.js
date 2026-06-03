@@ -2,7 +2,7 @@
  * CrazySudoku - Custom API Server Leaderboard & Visitor Counter Handler
  */
 
-const API_BASE_URL = 'http://15.164.104.181';
+const API_BASE_URL = 'https://apiservice.artractive.pe.kr';
 const API_KEY = '__CRAZY_SUDOKU_API_KEY__';
 
 let clientIdentifier = '';
