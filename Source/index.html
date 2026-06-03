@@ -27,30 +27,6 @@
 
         <!-- Main Dashboard -->
         <div class="dashboard">
-            <!-- Game Info (Timer, Lives, Items) -->
-            <div class="status-panel glass">
-                <div class="status-item">
-                    <span class="label"><i class="fa-regular fa-clock"></i> 시간</span>
-                    <span id="timer-val" class="value font-orbitron">00:00</span>
-                </div>
-                <div class="status-item">
-                    <span class="label"><i class="fa-solid fa-heart neon-red"></i> 라이프</span>
-                    <div id="lives-container" class="value">
-                        <i class="fa-solid fa-heart life-heart"></i>
-                        <i class="fa-solid fa-heart life-heart"></i>
-                        <i class="fa-solid fa-heart life-heart"></i>
-                    </div>
-                </div>
-                <div class="status-item">
-                    <span class="label"><i class="fa-solid fa-bolt neon-cyan"></i> 포인트</span>
-                    <span id="points-val" class="value font-orbitron">3 / 3</span>
-                </div>
-                <div class="status-item">
-                    <span class="label"><i class="fa-solid fa-circle-nodes"></i> 난이도</span>
-                    <span id="difficulty-val" class="value neon-cyan">Easy</span>
-                </div>
-            </div>
-
             <!-- Controls Panel -->
             <div class="controls-panel glass">
                 <div class="select-wrapper">
@@ -76,6 +52,30 @@
 
             <!-- Main Layout (Board & Controls Side-by-Side on desktop) -->
             <div class="game-layout">
+                <!-- Game Info (Timer, Lives, Items) - Vertical Left Sidebar -->
+                <div class="status-panel glass">
+                    <div class="status-item">
+                        <span class="label"><i class="fa-regular fa-clock"></i> 시간</span>
+                        <span id="timer-val" class="value font-orbitron">00:00</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label"><i class="fa-solid fa-heart neon-red"></i> 라이프</span>
+                        <div id="lives-container" class="value">
+                            <i class="fa-solid fa-heart life-heart"></i>
+                            <i class="fa-solid fa-heart life-heart"></i>
+                            <i class="fa-solid fa-heart life-heart"></i>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <span class="label"><i class="fa-solid fa-bolt neon-cyan"></i> 포인트</span>
+                        <span id="points-val" class="value font-orbitron">3 / 3</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label"><i class="fa-solid fa-circle-nodes"></i> 난이도</span>
+                        <span id="difficulty-val" class="value neon-cyan">Easy</span>
+                    </div>
+                </div>
+
                 <!-- Sudoku Board Frame -->
                 <div class="board-frame glass">
                     <div id="sudoku-grid" class="sudoku-grid">
