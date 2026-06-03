@@ -2,6 +2,8 @@
 
 > **네온 비주얼과 스릴 넘치는 디버프, 전략적 아이템이 가득한 차세대 웹 스도쿠 게임!**
 
+🔗 **배포 주소**: [https://tramper2.github.io/CrazySudoku/](https://tramper2.github.io/CrazySudoku/)
+
 Crazy Sudoku는 기존의 조용한 스도쿠 게임에서 탈피하여 화려한 네온 스타일 그래픽, 글래스모피즘(Glassmorphism) UI와 함께 실시간 방해 요소(디버프)를 극복하며 퍼즐을 푸는 새로운 감각의 웹 게임입니다.
 
 ---
@@ -57,8 +59,9 @@ CrazySudoku/
 이 프로젝트는 서버 사이드 언어(Node.js, PHP 등) 없이 순수하게 브라우저만으로 동작하는 정적(Static) 웹사이트입니다.
 - `Source/index.html` 파일을 크롬 등 웹 브라우저에서 직접 더블 클릭하여 실행하거나, VS Code의 `Live Server` 확장을 사용해 실행할 수 있습니다.
 
-### GitHub Pages (gh-pages) 배포 방법
-1. 본 프로젝트의 전체 파일들을 GitHub 원격 저장소에 올립니다.
+### GitHub Pages 배포 방법
+1. 원격 저장소로 소스 코드를 푸시합니다. (`main` 브랜치)
 2. 레포지토리의 **Settings -> Pages** 탭으로 이동합니다.
-3. **Build and deployment** 항목에서 브랜치를 `main`으로 설정하고 경로를 루트(`/`)로 지정한 뒤 **Save**를 누릅니다.
-4. 수 분 내에 GitHub에서 제공하는 무료 호스팅 도메인으로 게임 배포가 완료됩니다.
+3. **Build and deployment -> Source** 항목의 드롭다운을 **GitHub Actions**로 변경해 줍니다.
+4. 상단 **Actions** 탭에서 배포 완료 후 나타나는 퍼블릭 링크로 접속합니다.
+
