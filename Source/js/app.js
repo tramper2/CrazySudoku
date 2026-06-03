@@ -850,11 +850,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         btnSubmitRanking.disabled = true;
-        rankingSubmitStatus.textContent = '등록 중...';
+        rankingSubmitStatus.textContent = '기록 분석 중...';
         rankingSubmitStatus.className = 'submit-status-msg status-loading';
 
         try {
-            // 1. 플레이어 닉네임 설정
+            // 1. 기존 리더보드 최고 기록 조회
+            let bestScore = null;
+            if (window.getPlayerBestScore) {
+                bestScore = await window.getPlayerBestScore();
+            }
+
+            // 2. 기록 단축 여부 검사 (LootLocker 리더보드가 Ascending이므로 작을수록 우수)
+            const isFirstRecord = bestScore === null || bestScore === 0;
+            const isRecordBeaten = !isFirstRecord && timer < bestScore;
+
+            // 3. 플레이어 닉네임 설정 (기록 경신 여부와 무관하게 닉네임은 업데이트 허용)
             const nameSuccess = await window.setPlayerNickname(nickname);
             if (!nameSuccess) {
                 throw new Error('이름 등록에 실패했습니다.');
@@ -863,14 +873,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // 닉네임 로컬 스토리지 보존
             localStorage.setItem('sudoku_nickname', nickname);
 
-            // 2. 점수(시간 초) 제출
-            const scoreSuccess = await window.submitScoreToLootLocker(timer);
-            if (!scoreSuccess) {
-                throw new Error('점수 등록에 실패했습니다.');
+            if (isFirstRecord || isRecordBeaten) {
+                // 4. 새 기록이 더 빠른 경우에만 점수(시간 초) 제출
+                rankingSubmitStatus.textContent = '신기록 전송 중...';
+                const scoreSuccess = await window.submitScoreToLootLocker(timer);
+                if (!scoreSuccess) {
+                    throw new Error('점수 등록에 실패했습니다.');
+                }
+                
+                const timeDiffStr = isFirstRecord ? '' : ` (이전 대비 -${bestScore - timer}초 단축!)`;
+                rankingSubmitStatus.textContent = `명예의 전당 신기록 등록 완료!${timeDiffStr}`;
+                rankingSubmitStatus.className = 'submit-status-msg status-success';
+            } else {
+                // 기존 최고 기록보다 느린 경우 점수 제출은 스킵하고 안내만 표시
+                rankingSubmitStatus.textContent = `닉네임 수정 완료! (최고 기록 ${formatTime(bestScore)}이 더 우수하여 점수는 유지됩니다.)`;
+                rankingSubmitStatus.className = 'submit-status-msg status-success';
             }
-
-            rankingSubmitStatus.textContent = '명예의 전당 등록 완료!';
-            rankingSubmitStatus.className = 'submit-status-msg status-success';
             
             // 미니 랭킹 즉시 갱신
             refreshMiniLeaderboard();

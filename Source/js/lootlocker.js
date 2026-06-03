@@ -161,3 +161,31 @@ async function getLootLockerLeaderboard(count = 10) {
         return [];
     }
 }
+
+/**
+ * 현재 로그인한 게스트 플레이어의 기존 최고 랭킹 점수(초) 조회
+ */
+async function getPlayerBestScore() {
+    if (!playerToken || !playerId) {
+        return null;
+    }
+
+    try {
+        const response = await fetch(`${LOOTLOCKER_API_URL}/leaderboards/${LOOTLOCKER_LEADERBOARD_KEY}/member/${playerId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-session-token': playerToken
+            }
+        });
+
+        const data = await response.json();
+        if (response.ok && data.score) {
+            return data.score; // 기존 등록된 최고 시간 초
+        }
+        return null;
+    } catch (error) {
+        console.error('기존 점수 조회 오류:', error);
+        return null;
+    }
+}
