@@ -599,7 +599,7 @@ select:focus {
     gap: 6px;
 }
 
-.numpad-extra-btn:hover {
+.numpad-extra-btn:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -608,6 +608,14 @@ select:focus {
     border-color: var(--neon-violet);
     color: #c084fc;
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+.numpad-extra-btn:disabled {
+    color: #555861; /* 진한 회색 */
+    border-color: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.2);
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 /* Pause and Modals Overlay */
