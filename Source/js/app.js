@@ -69,9 +69,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBtnClose = document.getElementById('modal-btn-close');
     const pauseOverlay = document.getElementById('pause-overlay');
 
+    // Ranking DOM Elements
+    const rankingSubmitContainer = document.getElementById('ranking-submit-container');
+    const rankingNicknameInput = document.getElementById('ranking-nickname');
+    const btnSubmitRanking = document.getElementById('btn-submit-ranking');
+    const rankingSubmitStatus = document.getElementById('ranking-submit-status');
+    const rankingModal = document.getElementById('ranking-modal');
+    const rankingTableBody = document.getElementById('ranking-table-body');
+    const btnCloseRanking = document.getElementById('btn-close-ranking');
+    const btnShowAllRanks = document.getElementById('btn-show-all-ranks');
+    const miniRankList = document.getElementById('mini-rank-list');
+
     // Initialize UI state
     updateLivesUI();
     updatePointsUI();
+
+    // LootLocker 연동 초기화
+    if (window.initLootLocker) {
+        window.initLootLocker().then(success => {
+            if (success) {
+                refreshMiniLeaderboard();
+            }
+        });
+    }
 
     // Event Listeners
     btnStart.addEventListener('click', startNewGame);
@@ -101,6 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startNewGame();
     });
     modalBtnClose.addEventListener('click', hideModal);
+
+    // Ranking Buttons
+    btnSubmitRanking.addEventListener('click', submitPlayerScore);
+    btnShowAllRanks.addEventListener('click', showFullLeaderboard);
+    btnCloseRanking.addEventListener('click', () => rankingModal.classList.add('hide'));
 
     // Keyboard Navigation
     document.addEventListener('keydown', handleKeyDown);
@@ -608,10 +633,25 @@ document.addEventListener('DOMContentLoaded', () => {
             modalTitle.textContent = '🎉 MISSION CLEAR!';
             modalTitle.style.color = 'var(--neon-cyan)';
             modalMessage.textContent = '두뇌가 한계를 극복했습니다! 완벽한 퍼즐 풀이 성공!';
+
+            // 랭킹 입력 폼 활성화 및 이전 입력 닉네임 불러오기
+            if (rankingSubmitContainer) {
+                rankingSubmitContainer.classList.remove('hide');
+                const savedNickname = localStorage.getItem('sudoku_nickname') || '';
+                rankingNicknameInput.value = savedNickname;
+                rankingSubmitStatus.textContent = '';
+                rankingSubmitStatus.className = 'submit-status-msg';
+                btnSubmitRanking.disabled = false;
+            }
         } else {
             modalTitle.textContent = '💥 MISSION FAILED...';
             modalTitle.style.color = 'var(--neon-red)';
             modalMessage.textContent = '라이프가 전부 소진되었습니다. 다시 도전해 보세요!';
+
+            // 실패 시 랭킹 등록 불가 처리
+            if (rankingSubmitContainer) {
+                rankingSubmitContainer.classList.add('hide');
+            }
         }
 
         // Show stats
@@ -750,6 +790,127 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Failed to restore game state", e);
             localStorage.removeItem('crazy_sudoku_game_state');
+        }
+    }
+
+    // ----------------------------------------------------
+    // LootLocker Leaderboard Integration Helpers
+    // ----------------------------------------------------
+
+    function formatTime(seconds) {
+        const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const secs = String(seconds % 60).padStart(2, '0');
+        return `${mins}:${secs}`;
+    }
+
+    async function refreshMiniLeaderboard() {
+        if (!miniRankList || !window.getLootLockerLeaderboard) return;
+        
+        try {
+            const list = await window.getLootLockerLeaderboard(5); // 상위 5명
+            miniRankList.innerHTML = '';
+            
+            if (list.length === 0) {
+                miniRankList.innerHTML = '<li class="loading">등록된 순위가 없습니다.</li>';
+                return;
+            }
+
+            list.forEach(item => {
+                const li = document.createElement('li');
+                if (item.isMe) li.classList.add('me');
+                
+                li.innerHTML = `
+                    <span>
+                        <span class="rank-num">#${item.rank}</span>
+                        <span class="rank-name">${item.name}</span>
+                    </span>
+                    <span class="rank-time">${formatTime(item.score)}</span>
+                `;
+                miniRankList.appendChild(li);
+            });
+        } catch (error) {
+            console.error('미니 리더보드 갱신 실패:', error);
+            miniRankList.innerHTML = '<li class="loading">순위 로드 실패</li>';
+        }
+    }
+
+    async function submitPlayerScore() {
+        const nickname = rankingNicknameInput.value.trim();
+        
+        if (!nickname) {
+            rankingSubmitStatus.textContent = '닉네임을 입력해주세요!';
+            rankingSubmitStatus.className = 'submit-status-msg status-error';
+            return;
+        }
+
+        if (nickname.length > 10) {
+            rankingSubmitStatus.textContent = '닉네임은 최대 10자까지입니다.';
+            rankingSubmitStatus.className = 'submit-status-msg status-error';
+            return;
+        }
+
+        btnSubmitRanking.disabled = true;
+        rankingSubmitStatus.textContent = '등록 중...';
+        rankingSubmitStatus.className = 'submit-status-msg status-loading';
+
+        try {
+            // 1. 플레이어 닉네임 설정
+            const nameSuccess = await window.setPlayerNickname(nickname);
+            if (!nameSuccess) {
+                throw new Error('이름 등록에 실패했습니다.');
+            }
+
+            // 닉네임 로컬 스토리지 보존
+            localStorage.setItem('sudoku_nickname', nickname);
+
+            // 2. 점수(시간 초) 제출
+            const scoreSuccess = await window.submitScoreToLootLocker(timer);
+            if (!scoreSuccess) {
+                throw new Error('점수 등록에 실패했습니다.');
+            }
+
+            rankingSubmitStatus.textContent = '명예의 전당 등록 완료!';
+            rankingSubmitStatus.className = 'submit-status-msg status-success';
+            
+            // 미니 랭킹 즉시 갱신
+            refreshMiniLeaderboard();
+        } catch (error) {
+            console.error(error);
+            rankingSubmitStatus.textContent = error.message || '등록 중 오류가 발생했습니다.';
+            rankingSubmitStatus.className = 'submit-status-msg status-error';
+            btnSubmitRanking.disabled = false;
+        }
+    }
+
+    async function showFullLeaderboard() {
+        if (!rankingModal || !rankingTableBody || !window.getLootLockerLeaderboard) return;
+
+        rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; font-style:italic;">불러오는 중...</td></tr>';
+        rankingModal.classList.remove('hide');
+
+        try {
+            const list = await window.getLootLockerLeaderboard(30); // 상위 30명
+            rankingTableBody.innerHTML = '';
+
+            if (list.length === 0) {
+                rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">순위가 아직 존재하지 않습니다. 첫 랭커가 되어보세요!</td></tr>';
+                return;
+            }
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                if (item.isMe) tr.classList.add('me-row');
+
+                tr.innerHTML = `
+                    <td>#${item.rank}</td>
+                    <td>${item.name}</td>
+                    <td>${formatTime(item.score)}</td>
+                `;
+                rankingTableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error(error);
+            rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--neon-red);">순위를 불러오는 중 오류가 발생했습니다.</td></tr>';
         }
     }
 

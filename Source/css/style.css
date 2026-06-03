@@ -818,6 +818,27 @@ footer {
     .status-item:last-child {
         border-right: none;
     }
+
+    /* 반응형 구조에서 미니 랭킹 가로 정렬 */
+    .mini-leaderboard {
+        grid-column: span 4;
+        border-top: 1px solid var(--border-glass);
+        padding-top: 12px;
+        margin-top: 8px;
+    }
+    .mini-rank-list {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+    }
+    .mini-rank-list li {
+        border-bottom: none !important;
+        border-right: 1px solid var(--border-glass);
+        padding-right: 4px;
+    }
+    .mini-rank-list li:last-child {
+        border-right: none;
+    }
 }
 
 @media(max-width: 820px) {
@@ -837,6 +858,22 @@ footer {
         padding-bottom: 0;
         padding-top: 8px;
     }
+
+    .mini-leaderboard {
+        grid-column: span 2;
+    }
+    .mini-rank-list {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+    .mini-rank-list li {
+        border-right: none;
+        border-bottom: 1px solid var(--border-glass) !important;
+        padding-bottom: 4px;
+    }
+    .mini-rank-list li:nth-last-child(-n+2) {
+        border-bottom: none !important;
+    }
 }
 
 @media(max-width: 480px) {
@@ -848,3 +885,210 @@ footer {
         font-size: 1.1rem;
     }
 }
+
+/* --- Ranking & Leaderboard Custom Styles --- */
+
+.mini-leaderboard {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mini-title {
+    font-size: 0.8rem;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.neon-gold {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.mini-rank-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mini-rank-list li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+}
+
+.mini-rank-list li:last-child {
+    border-bottom: none;
+}
+
+.mini-rank-list li.loading {
+    justify-content: center;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.mini-rank-list li .rank-num {
+    font-weight: 700;
+    color: var(--neon-violet);
+    margin-right: 6px;
+}
+
+.mini-rank-list li.me .rank-name {
+    color: #38bdf8;
+    font-weight: bold;
+}
+
+.mini-rank-list li .rank-time {
+    font-family: var(--font-numbers);
+    color: var(--text-main);
+}
+
+.btn-text-link {
+    background: none;
+    border: none;
+    color: var(--neon-cyan);
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    align-self: flex-start;
+    padding: 2px 0;
+    transition: color 0.2s;
+}
+
+.btn-text-link:hover {
+    color: var(--text-main);
+}
+
+/* Ranking Submit Box inside Game Clear Modal */
+.modal-divider {
+    border: 0;
+    height: 1px;
+    background: var(--border-glass);
+    margin: 16px 0;
+    width: 100%;
+}
+
+.submit-title {
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.submit-input-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.submit-input-group input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-main);
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.submit-input-group input:focus {
+    border-color: var(--neon-cyan);
+}
+
+.submit-status-msg {
+    font-size: 0.8rem;
+    height: 1.2rem;
+    margin: 0;
+    transition: color 0.2s;
+}
+
+.status-success {
+    color: #4ade80;
+}
+
+.status-error {
+    color: var(--neon-red);
+}
+
+.status-loading {
+    color: var(--text-muted);
+}
+
+/* Full Ranking Modal custom style */
+.ranking-box {
+    max-width: 500px;
+    max-height: 80vh;
+}
+
+.scrollable {
+    overflow-y: auto;
+    width: 100%;
+    max-height: 50vh;
+    padding-right: 8px;
+}
+
+/* Custom Scrollbar for Neon look */
+.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+.scrollable::-webkit-scrollbar-thumb {
+    background: var(--neon-violet);
+    border-radius: 3px;
+    box-shadow: 0 0 5px var(--neon-violet);
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.ranking-table th, .ranking-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ranking-table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--neon-cyan);
+    font-weight: 600;
+}
+
+.ranking-table tr.me-row td {
+    background: rgba(56, 189, 248, 0.08);
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.ranking-table td:first-child {
+    font-family: var(--font-numbers);
+    font-weight: bold;
+}
+
+.ranking-table td:last-child {
+    font-family: var(--font-numbers);
+}
+

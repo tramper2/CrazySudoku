@@ -74,6 +74,15 @@
                         <span class="label"><i class="fa-solid fa-circle-nodes"></i> 난이도</span>
                         <span id="difficulty-val" class="value neon-cyan">Easy</span>
                     </div>
+                    
+                    <!-- Mini Leaderboard -->
+                    <div class="mini-leaderboard">
+                        <h4 class="mini-title"><i class="fa-solid fa-trophy neon-gold"></i> Top 5 랭킹</h4>
+                        <ul id="mini-rank-list" class="mini-rank-list">
+                            <li class="loading">불러오는 중...</li>
+                        </ul>
+                        <button id="btn-show-all-ranks" class="btn-text-link">전체 순위 보기</button>
+                    </div>
                 </div>
 
                 <!-- Sudoku Board Frame -->
@@ -174,6 +183,17 @@
                         <span id="modal-stat-time" class="stat-value">05:24</span>
                     </div>
                 </div>
+                
+                <!-- LootLocker Leaderboard Submit Form (Only shown on win) -->
+                <div id="ranking-submit-container" class="ranking-submit-container hide">
+                    <hr class="modal-divider">
+                    <h3 class="submit-title"><i class="fa-solid fa-trophy neon-gold"></i> 명예의 전당 등록</h3>
+                    <div class="submit-input-group">
+                        <input type="text" id="ranking-nickname" placeholder="닉네임을 입력하세요 (최대 10자)" maxlength="10">
+                        <button id="btn-submit-ranking" class="btn btn-primary">등록</button>
+                    </div>
+                    <p id="ranking-submit-status" class="submit-status-msg"></p>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="modal-btn-restart" class="btn btn-primary">다시 도전</button>
@@ -182,8 +202,33 @@
         </div>
     </div>
 
+    <!-- All Ranks Overlay Modal -->
+    <div id="ranking-modal" class="modal-overlay hide">
+        <div class="modal-box glass ranking-box">
+            <h2 class="neon-text"><i class="fa-solid fa-ranking-star"></i> CRAZY SUDOKU 명예의 전당</h2>
+            <div class="modal-body scrollable">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>닉네임</th>
+                            <th>기록 시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                        <!-- Ranks will be loaded here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-close-ranking" class="btn btn-secondary">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Inject JS Libraries -->
     <script src="js/sudoku-core.js"></script>
+    <script src="js/lootlocker.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
