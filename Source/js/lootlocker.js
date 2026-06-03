@@ -65,7 +65,7 @@ async function setPlayerNickname(nickname) {
     }
 
     try {
-        const response = await fetch(`${LOOTLOCKER_API_URL}/v2/player/name`, {
+        const response = await fetch(`${LOOTLOCKER_API_URL}/player/name`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ async function submitScoreToLootLocker(scoreSeconds) {
     }
 
     try {
-        const response = await fetch(`${LOOTLOCKER_API_URL}/v2/leaderboards/${LOOTLOCKER_LEADERBOARD_KEY}/submit`, {
+        const response = await fetch(`${LOOTLOCKER_API_URL}/leaderboards/${LOOTLOCKER_LEADERBOARD_KEY}/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ async function getLootLockerLeaderboard(count = 10) {
     }
 
     try {
-        const response = await fetch(`${LOOTLOCKER_API_URL}/v2/leaderboards/${LOOTLOCKER_LEADERBOARD_KEY}/list?count=${count}`, {
+        const response = await fetch(`${LOOTLOCKER_API_URL}/leaderboards/${LOOTLOCKER_LEADERBOARD_KEY}/list?count=${count}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
