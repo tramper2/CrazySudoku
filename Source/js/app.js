@@ -803,6 +803,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins}:${secs}`;
     }
 
+    // Encoding: Crazy (0+), Hard (10000+), Medium (20000+), Easy (30000+)
+    function encodeLeaderboardScore(time, diff) {
+        let offset = 30000;
+        if (diff === 'crazy') offset = 0;
+        else if (diff === 'hard') offset = 10000;
+        else if (diff === 'medium') offset = 20000;
+        return offset + time;
+    }
+
+    function decodeLeaderboardScore(score) {
+        if (score < 10000) {
+            return { difficulty: 'CRAZY', time: score, difficultyClass: 'neon-red' };
+        } else if (score < 20000) {
+            return { difficulty: 'HARD', time: score - 10000, difficultyClass: 'neon-yellow' };
+        } else if (score < 30000) {
+            return { difficulty: 'MEDIUM', time: score - 20000, difficultyClass: 'neon-violet' };
+        } else {
+            return { difficulty: 'EASY', time: score - 30000, difficultyClass: 'neon-cyan' };
+        }
+    }
+
     async function refreshMiniLeaderboard() {
         if (!miniRankList || !window.getLootLockerLeaderboard) return;
         
@@ -819,12 +840,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const li = document.createElement('li');
                 if (item.isMe) li.classList.add('me');
                 
+                const decoded = decodeLeaderboardScore(item.score);
                 li.innerHTML = `
                     <span>
                         <span class="rank-num">#${item.rank}</span>
                         <span class="rank-name">${item.name}</span>
+                        <span class="rank-diff ${decoded.difficultyClass}" style="font-size: 0.7rem; font-weight: bold; margin-left: 4px;">[${decoded.difficulty}]</span>
                     </span>
-                    <span class="rank-time">${formatTime(item.score)}</span>
+                    <span class="rank-time">${formatTime(decoded.time)}</span>
                 `;
                 miniRankList.appendChild(li);
             });
@@ -862,7 +885,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. 기록 단축 여부 검사 (LootLocker 리더보드가 Ascending이므로 작을수록 우수)
             const isFirstRecord = bestScore === null || bestScore === 0;
-            const isRecordBeaten = !isFirstRecord && timer < bestScore;
+            const encodedCurrentScore = encodeLeaderboardScore(timer, difficulty);
+            const isRecordBeaten = !isFirstRecord && encodedCurrentScore < bestScore;
 
             // 3. 플레이어 닉네임 설정 (기록 경신 여부와 무관하게 닉네임은 업데이트 허용)
             const nameSuccess = await window.setPlayerNickname(nickname);
@@ -876,17 +900,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isFirstRecord || isRecordBeaten) {
                 // 4. 새 기록이 더 빠른 경우에만 점수(시간 초) 제출
                 rankingSubmitStatus.textContent = '신기록 전송 중...';
-                const scoreSuccess = await window.submitScoreToLootLocker(timer);
+                const scoreSuccess = await window.submitScoreToLootLocker(encodedCurrentScore);
                 if (!scoreSuccess) {
                     throw new Error('점수 등록에 실패했습니다.');
                 }
                 
-                const timeDiffStr = isFirstRecord ? '' : ` (이전 대비 -${bestScore - timer}초 단축!)`;
+                const decodedBest = isFirstRecord ? null : decodeLeaderboardScore(bestScore);
+                const sameDiff = decodedBest && decodedBest.difficulty === difficulty.toUpperCase();
+                const timeDiffStr = (isFirstRecord || !sameDiff) ? '' : ` (이전 대비 -${decodedBest.time - timer}초 단축!)`;
+                
                 rankingSubmitStatus.textContent = `명예의 전당 신기록 등록 완료!${timeDiffStr}`;
                 rankingSubmitStatus.className = 'submit-status-msg status-success';
             } else {
                 // 기존 최고 기록보다 느린 경우 점수 제출은 스킵하고 안내만 표시
-                rankingSubmitStatus.textContent = `닉네임 수정 완료! (최고 기록 ${formatTime(bestScore)}이 더 우수하여 점수는 유지됩니다.)`;
+                const decodedBest = decodeLeaderboardScore(bestScore);
+                rankingSubmitStatus.textContent = `닉네임 수정 완료! (최고 기록 [${decodedBest.difficulty}] ${formatTime(decodedBest.time)}이 더 우수하여 점수는 유지됩니다.)`;
                 rankingSubmitStatus.className = 'submit-status-msg status-success';
             }
             
@@ -903,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function showFullLeaderboard() {
         if (!rankingModal || !rankingTableBody || !window.getLootLockerLeaderboard) return;
 
-        rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; font-style:italic;">불러오는 중...</td></tr>';
+        rankingTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; font-style:italic;">불러오는 중...</td></tr>';
         rankingModal.classList.remove('hide');
 
         try {
@@ -911,7 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingTableBody.innerHTML = '';
 
             if (list.length === 0) {
-                rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">순위가 아직 존재하지 않습니다. 첫 랭커가 되어보세요!</td></tr>';
+                rankingTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">순위가 아직 존재하지 않습니다. 첫 랭커가 되어보세요!</td></tr>';
                 return;
             }
 
@@ -919,16 +947,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tr = document.createElement('tr');
                 if (item.isMe) tr.classList.add('me-row');
 
+                const decoded = decodeLeaderboardScore(item.score);
                 tr.innerHTML = `
                     <td>#${item.rank}</td>
                     <td>${item.name}</td>
-                    <td>${formatTime(item.score)}</td>
+                    <td class="${decoded.difficultyClass}" style="font-weight: bold; font-size: 0.85rem;">${decoded.difficulty}</td>
+                    <td>${formatTime(decoded.time)}</td>
                 `;
                 rankingTableBody.appendChild(tr);
             });
         } catch (error) {
             console.error(error);
-            rankingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--neon-red);">순위를 불러오는 중 오류가 발생했습니다.</td></tr>';
+            rankingTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--neon-red);">순위를 불러오는 중 오류가 발생했습니다.</td></tr>';
         }
     }
 

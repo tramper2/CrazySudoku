@@ -158,6 +158,8 @@ header {
 
 .neon-red { color: var(--neon-red); }
 .neon-cyan { color: var(--neon-cyan); }
+.neon-yellow { color: var(--neon-yellow); }
+.neon-violet { color: var(--neon-violet); }
 
 .life-heart {
     color: var(--neon-red);
