@@ -387,7 +387,7 @@ select:focus {
 }
 
 .sudoku-cell.highlight-rowcol {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(239, 68, 68, 0.12);
 }
 
 .sudoku-cell.highlight-same {
