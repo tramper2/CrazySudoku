@@ -28,6 +28,10 @@ jobs:
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
+      - name: Inject API Key
+        run: |
+          sed -i "s/__CRAZY_SUDOKU_API_KEY__/${{ secrets.CRAZY_SUDOKU_API_KEY }}/g" ./Source/js/leaderboard.js
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

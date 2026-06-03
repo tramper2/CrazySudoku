@@ -84,11 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLivesUI();
     updatePointsUI();
 
-    // LootLocker 연동 초기화
-    if (window.initLootLocker) {
-        window.initLootLocker().then(success => {
+    // 리더보드 및 방문자 API 연동 초기화
+    if (window.initLeaderboard) {
+        window.initLeaderboard().then(success => {
             if (success) {
                 refreshMiniLeaderboard();
+                updateVisitorCountUI();
             }
         });
     }
@@ -803,24 +804,36 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins}:${secs}`;
     }
 
-    // Encoding: Crazy (0+), Hard (10000+), Medium (20000+), Easy (30000+)
+    // Encoding: Easy (10000 - time), Medium (20000 - time), Hard (30000 - time), Crazy (40000 - time)
+    // Higher score is better.
     function encodeLeaderboardScore(time, diff) {
-        let offset = 30000;
-        if (diff === 'crazy') offset = 0;
-        else if (diff === 'hard') offset = 10000;
-        else if (diff === 'medium') offset = 20000;
-        return offset + time;
+        const safeTime = Math.min(Math.max(0, time), 9999);
+        let base = 10000;
+        if (diff === 'crazy') base = 40000;
+        else if (diff === 'hard') base = 30000;
+        else if (diff === 'medium') base = 20000;
+        return base - safeTime;
     }
 
     function decodeLeaderboardScore(score) {
-        if (score < 10000) {
-            return { difficulty: 'CRAZY', time: score, difficultyClass: 'neon-red' };
-        } else if (score < 20000) {
-            return { difficulty: 'HARD', time: score - 10000, difficultyClass: 'neon-yellow' };
-        } else if (score < 30000) {
-            return { difficulty: 'MEDIUM', time: score - 20000, difficultyClass: 'neon-violet' };
+        if (score > 30000) {
+            return { difficulty: 'CRAZY', time: 40000 - score, difficultyClass: 'neon-red' };
+        } else if (score > 20000) {
+            return { difficulty: 'HARD', time: 30000 - score, difficultyClass: 'neon-yellow' };
+        } else if (score > 10000) {
+            return { difficulty: 'MEDIUM', time: 20000 - score, difficultyClass: 'neon-violet' };
         } else {
-            return { difficulty: 'EASY', time: score - 30000, difficultyClass: 'neon-cyan' };
+            return { difficulty: 'EASY', time: 10000 - score, difficultyClass: 'neon-cyan' };
+        }
+    }
+
+    // 방문자 수 업데이트 함수
+    async function updateVisitorCountUI() {
+        const valEl = document.getElementById('visitor-count-val');
+        if (!valEl || !window.getTotalVisitorCount) return;
+        const count = await window.getTotalVisitorCount();
+        if (count > 0) {
+            valEl.textContent = count.toLocaleString();
         }
     }
 
@@ -883,10 +896,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 bestScore = await window.getPlayerBestScore();
             }
 
-            // 2. 기록 단축 여부 검사 (LootLocker 리더보드가 Ascending이므로 작을수록 우수)
+            // 2. 기록 단축 여부 검사 (서버가 Descending이므로 클수록 우수)
             const isFirstRecord = bestScore === null || bestScore === 0;
             const encodedCurrentScore = encodeLeaderboardScore(timer, difficulty);
-            const isRecordBeaten = !isFirstRecord && encodedCurrentScore < bestScore;
+            const isRecordBeaten = !isFirstRecord && encodedCurrentScore > bestScore;
 
             // 3. 플레이어 닉네임 설정 (기록 경신 여부와 무관하게 닉네임은 업데이트 허용)
             const nameSuccess = await window.setPlayerNickname(nickname);
